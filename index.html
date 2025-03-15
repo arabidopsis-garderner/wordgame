@@ -6,51 +6,52 @@
     <title>汉字拼读挑战赛完整版</title>
     <style>
         :root {
-            --primary-color: #FFB6C1; /* 定义主色调，用于背景渐变 */
-            --secondary-color: #87CEEB; /* 定义副色调，用于背景渐变 */
+            --primary-color: #FFB6C1; /* 主色调，用于背景渐变 */
+            --secondary-color: #87CEEB; /* 副色调，用于背景渐变 */
         }
 
         body {
-            font-family: 'Comic Sans MS', '幼圆', 'YouYuan', 'PingFang SC', sans-serif; /* 设置字体，支持 iOS 和 Android 的回退 */
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* 背景渐变，增强视觉效果 */
-            min-height: 100vh; /* 确保页面至少占满视口高度 */
+            font-family: 'Comic Sans MS', '幼圆', 'YouYuan', 'PingFang SC', sans-serif; /* 字体支持 iOS 和 Android */
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* 背景渐变 */
+            min-height: 100vh; /* 占满视口高度 */
             margin: 0; /* 移除默认外边距 */
-            padding: 20px; /* 添加内边距，优化移动端显示 */
-            display: flex; /* 使用 Flex 布局居中内容 */
-            flex-direction: column; /* 垂直排列元素 */
+            padding: 20px; /* 添加内边距 */
+            display: flex; /* Flex 布局居中 */
+            flex-direction: column; /* 垂直排列 */
             align-items: center; /* 水平居中 */
         }
         
         .game-title {
-            color: #ff4757; /* 设置标题颜色为红色 */
-            font-size: 2.5em; /* 标题字体大小 */
-            text-shadow: 2px 2px #fff; /* 添加白色阴影，提升可读性 */
+            color: #ff4757; /* 标题颜色 */
+            font-size: 2.5em; /* 标题大小 */
+            text-shadow: 2px 2px #fff; /* 白色阴影提升可读性 */
             margin: 20px 0; /* 上下外边距 */
         }
 
         .game-container {
             background: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
-            border-radius: 20px; /* 圆角设计 */
+            border-radius: 20px; /* 圆角 */
             padding: 20px; /* 内边距 */
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* 添加阴影，增强立体感 */
-            max-width: 900px; /* 最大宽度限制 */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* 阴影效果 */
+            max-width: 900px; /* 最大宽度 */
             width: 100%; /* 占满可用宽度 */
         }
 
         .game-grid {
-            display: grid; /* 使用网格布局 */
-            grid-template-columns: repeat(6, 1fr); /* 默认 6 列等宽布局 */
+            display: grid; /* 使用单一网格布局 */
+            grid-template-rows: auto auto auto; /* 三行：拼音、放置区、汉字 */
+            grid-template-columns: repeat(6, 1fr); /* 6 列等宽 */
             gap: 15px; /* 网格间距 */
-            justify-items: center; /* 网格项水平居中 */
+            justify-items: center; /* 水平居中 */
             margin: 20px 0; /* 上下外边距 */
         }
 
         .pinyin {
-            color: #4CAF50; /* 拼音颜色为绿色 */
+            color: #4CAF50; /* 绿色拼音 */
             font-size: 24px; /* 默认字体大小 */
             text-align: center; /* 居中对齐 */
             width: 100px; /* 固定宽度 */
-            margin: 0 5px; /* 左右外边距 */
+            grid-row: 1; /* 固定在第一行 */
         }
 
         .drop-zone {
@@ -59,13 +60,13 @@
             border: 2px solid #666; /* 灰色边框 */
             border-radius: 10px; /* 圆角 */
             background: white; /* 白色背景 */
-            margin: 0 5px; /* 左右外边距 */
-            display: flex; /* Flex 布局居中内容 */
+            display: flex; /* Flex 居中内容 */
             justify-content: center; /* 水平居中 */
             align-items: center; /* 垂直居中 */
             font-size: 42px; /* 默认字体大小 */
             font-family: '华文彩云', 'PingFang SC', sans-serif; /* 字体支持跨平台 */
-            touch-action: none; /* 禁用触摸默认行为，避免干扰拖动 */
+            touch-action: none; /* 禁用触摸默认行为 */
+            grid-row: 2; /* 固定在第二行 */
         }
 
         .character {
@@ -74,26 +75,27 @@
             background: white; /* 白色背景 */
             border-radius: 10px; /* 圆角 */
             box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 阴影效果 */
-            cursor: grab; /* 鼠标手势提示可拖动 */
+            cursor: grab; /* 鼠标手势 */
             user-select: none; /* 禁用文本选择 */
-            display: flex; /* Flex 布局居中内容 */
+            display: flex; /* Flex 居中内容 */
             justify-content: center; /* 水平居中 */
             align-items: center; /* 垂直居中 */
             font-size: 42px; /* 默认字体大小 */
             font-family: '华文彩云', 'PingFang SC', sans-serif; /* 字体支持跨平台 */
-            transition: all 0.3s; /* 平滑过渡效果 */
+            transition: transform 0.3s; /* 平滑变换 */
             padding: 10px; /* 增大触摸区域 */
-            will-change: transform; /* 优化动画性能，提示浏览器提前准备变换 */
+            will-change: transform; /* 优化动画性能 */
+            grid-row: 3; /* 固定在第三行 */
         }
 
         .character:hover, .character.dragging {
-            transform: scale(1.05); /* 拖动或悬停时放大，提供视觉反馈 */
+            transform: scale(1.05); /* 拖动或悬停时放大 */
             box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* 增强阴影 */
-            background: rgba(0,0,0,0.05); /* 轻微高亮效果 */
+            background: rgba(0,0,0,0.05); /* 轻微高亮 */
         }
 
         .character[hidden] {
-            display: none !important; /* 隐藏已匹配的字符 */
+            display: none !important; /* 隐藏已匹配字符 */
         }
 
         .correct { 
@@ -145,18 +147,16 @@
 
         /* 横屏模式适配 */
         @media (orientation: landscape) {
-            .game-grid { grid-template-columns: repeat(10, 1fr); gap: 15px; } /* 横屏下 10 列 */
+            .game-grid { grid-template-columns: repeat(10, 1fr); gap: 15px; } /* 10 列布局 */
             .drop-zone, .character { width: 70px; height: 70px; } /* 调整元素大小 */
         }
     </style>
 </head>
 <body>
     <h1 class="game-title">🐼 智能汉字拼读挑战 🎪</h1> <!-- 游戏标题 -->
-    <div id="speech-prompt">点击任意汉字以启用语音功能</div> <!-- 语音功能提示 -->
+    <div id="speech-prompt">点击任意汉字以启用语音功能</div> <!-- 语音提示 -->
     <div class="game-container">
-        <div class="game-grid" id="pinyin-row"></div> <!-- 拼音行 -->
-        <div class="game-grid" id="dropzone-row"></div> <!-- 放置区行 -->
-        <div class="game-grid" id="character-row"></div> <!-- 汉字行 -->
+        <div class="game-grid" id="game-grid"></div> <!-- 单一网格容器 -->
     </div>
     <button id="restart">再来一次！</button> <!-- 重启按钮 -->
 
@@ -229,12 +229,12 @@
 
         class Game {
             constructor() {
-                this.weights = JSON.parse(localStorage.getItem('characterWeights')) || {}; // 从 localStorage 获取权重，或初始化为空对象
+                this.weights = JSON.parse(localStorage.getItem('characterWeights')) || {}; // 从 localStorage 获取权重
                 this.initWeights(); // 初始化权重
                 this.synth = window.speechSynthesis; // 获取语音合成 API
                 this.utterance = new SpeechSynthesisUtterance(); // 创建语音实例
                 this.utterance.lang = 'zh-CN'; // 设置语言为中文
-                this.utterance.rate = 0.8; // 设置语速为稍慢
+                this.utterance.rate = 0.8; // 设置语速稍慢
                 this.initGame(); // 初始化游戏
             }
 
@@ -281,31 +281,40 @@
             }
 
             renderGame(pairs) {
-                // 渲染拼音、放置区和汉字行
-                const pinyinRow = document.getElementById('pinyin-row');
-                const dropRow = document.getElementById('dropzone-row');
-                const charRow = document.getElementById('character-row');
-                
-                pinyinRow.innerHTML = dropRow.innerHTML = charRow.innerHTML = ''; // 清空内容
+                // 渲染单一网格，包含拼音、放置区和汉字
+                const grid = document.getElementById('game-grid');
+                grid.innerHTML = ''; // 清空内容
 
-                pairs.forEach(([pinyin]) => {
-                    pinyinRow.innerHTML += `<div class="pinyin">${pinyin}</div>`; // 添加拼音
+                pairs.forEach(([pinyin, char], index) => {
+                    // 添加拼音
+                    const pinyinDiv = document.createElement('div');
+                    pinyinDiv.className = 'pinyin';
+                    pinyinDiv.textContent = pinyin;
+                    pinyinDiv.style.gridColumn = index + 1; // 设置列位置
+                    grid.appendChild(pinyinDiv);
+
+                    // 添加放置区
                     const dropZone = document.createElement('div');
                     dropZone.className = 'drop-zone';
-                    dropZone.dataset.pinyin = pinyin; // 存储拼音数据
-                    dropRow.appendChild(dropZone); // 添加放置区
+                    dropZone.dataset.pinyin = pinyin; // 确保拼音数据正确设置
+                    dropZone.style.gridColumn = index + 1; // 设置列位置
+                    grid.appendChild(dropZone);
+
+                    // 添加汉字（随机顺序）
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'character';
+                    charDiv.draggable = true; // 启用鼠标拖放
+                    charDiv.dataset.char = char; // 存储汉字数据
+                    charDiv.textContent = char; // 设置显示文本
+                    charDiv.style.gridColumn = index + 1; // 设置列位置
+                    grid.appendChild(charDiv);
                 });
 
-                pairs
-                    .sort(() => Math.random() - 0.5) // 随机排序汉字
-                    .forEach(([_, char]) => {
-                        const charDiv = document.createElement('div');
-                        charDiv.className = 'character';
-                        charDiv.draggable = true; // 启用鼠标拖放
-                        charDiv.dataset.char = char; // 存储汉字数据
-                        charDiv.textContent = char; // 设置显示文本
-                        charRow.appendChild(charDiv); // 添加汉字
-                    });
+                // 随机打乱汉字位置
+                const charRow = Array.from(grid.querySelectorAll('.character'));
+                charRow.sort(() => Math.random() - 0.5).forEach((char, idx) => {
+                    char.style.gridColumn = idx + 1; // 重新分配列位置
+                });
             }
 
             setupDragDrop() {
@@ -322,39 +331,40 @@
 
                     char.addEventListener('dragend', () => {
                         char.classList.remove('dragging'); // 移除拖动样式
+                        char.style.transform = ''; // 重置变换
                     });
 
                     // 触摸支持
+                    let startX, startY, initialX, initialY;
                     char.addEventListener('touchstart', e => {
                         e.preventDefault(); // 防止默认触摸行为
-                        char.dataset.dragging = true; // 标记为拖动状态
                         char.classList.add('dragging'); // 添加拖动样式
                         const touch = e.touches[0];
-                        char.dataset.offsetX = touch.clientX - char.offsetLeft; // 计算触摸偏移
-                        char.dataset.offsetY = touch.clientY - char.offsetTop;
+                        startX = touch.clientX; // 记录触摸起始位置
+                        startY = touch.clientY;
+                        const rect = char.getBoundingClientRect();
+                        initialX = rect.left; // 记录元素初始位置
+                        initialY = rect.top;
                     });
 
                     char.addEventListener('touchmove', e => {
-                        if (char.dataset.dragging) {
+                        if (char.classList.contains('dragging')) {
                             const touch = e.touches[0];
-                            // 使用 requestAnimationFrame 平滑更新位置
+                            const deltaX = touch.clientX - startX; // 计算偏移量
+                            const deltaY = touch.clientY - startY;
+                            // 使用 transform 提升性能
                             requestAnimationFrame(() => {
-                                char.style.position = 'absolute';
-                                char.style.left = `${touch.clientX - char.dataset.offsetX}px`;
-                                char.style.top = `${touch.clientY - char.dataset.offsetY}px`;
+                                char.style.transform = `translate(${deltaX}px, ${deltaY}px)`; // 平滑移动
                             });
                         }
                     });
 
                     char.addEventListener('touchend', e => {
-                        if (char.dataset.dragging) {
-                            char.dataset.dragging = false; // 取消拖动状态
+                        if (char.classList.contains('dragging')) {
                             char.classList.remove('dragging'); // 移除拖动样式
                             const touch = e.changedTouches[0];
                             const dropZone = document.elementFromPoint(touch.clientX, touch.clientY); // 检测目标区域
-                            char.style.position = ''; // 重置位置样式
-                            char.style.left = '';
-                            char.style.top = '';
+                            char.style.transform = ''; // 重置变换
                             if (dropZone && dropZone.classList.contains('drop-zone')) {
                                 this.handleDrop(char.dataset.char, dropZone); // 处理放置逻辑
                             }
@@ -373,7 +383,8 @@
             }
 
             handleDrop(char, zone) {
-                // 处理拖放结果
+                // 处理拖放结果，包含调试日志
+                console.log('Dropping char:', char, 'on pinyin:', zone.dataset.pinyin); // 调试日志
                 const correctPinyin = pronunciationMap[char];
                 if (zone.dataset.pinyin === correctPinyin) {
                     zone.innerHTML = `<div style="font-size:inherit">${char}</div>`; // 显示匹配汉字
@@ -399,10 +410,10 @@
             }
 
             setupSpeech() {
-                // 设置语音功能，包含错误处理
+                // 设置语音功能，包含支持检查和错误处理
                 const prompt = document.getElementById('speech-prompt');
-                if (!this.synth) {
-                    prompt.textContent = '当前设备不支持语音功能'; // 处理不支持的情况
+                if (!('speechSynthesis' in window)) {
+                    prompt.textContent = 'Speech synthesis not supported'; // 检查 API 支持
                     return;
                 }
 
@@ -412,8 +423,9 @@
                             this.utterance.text = char.dataset.char; // 设置朗读文本
                             this.synth.speak(this.utterance); // 触发语音
                             prompt.style.display = 'none'; // 隐藏提示
-                        } catch (e) {
-                            prompt.textContent = '语音功能暂不可用'; // 显示错误提示
+                        } catch (error) {
+                            console.error('Speech synthesis error:', error); // 捕获错误
+                            prompt.textContent = '语音功能暂不可用，请再次点击尝试'; // 显示错误提示
                         }
                     });
                 });
