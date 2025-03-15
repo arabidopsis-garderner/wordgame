@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(#ffcccc, #ffffff);
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+#game {
+    width: 100%;
+    max-width: 600px;
+    height: 100vh;
+    overflow: hidden;
+}
