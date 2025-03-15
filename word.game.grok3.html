@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汉字学习游戏</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(to bottom, #ffcccc, #ffffff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .pinyin {
+            margin: 10px;
+            font-size: 24px;
+            color: #333;
+            background: #fff;
+            padding: 5px 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .box {
+            width: 60px;
+            height: 60px;
+            border: 3px dashed #ff9999;
+            border-radius: 15px;
+            background: #fff;
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .box.filled {
+            border: none;
+            background: #90ee90;
+            color: #fff;
+            box-shadow: 0 0 10px #66cc66;
+        }
+        .character {
+            width: 60px;
+            height: 60px;
+            background: #ffeb99;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: move;
+            transition: transform 0.2s ease;
+        }
+        .character:hover {
+            transform: scale(1.1);
+            background: #ffe066;
+        }
+        .error {
+            border: 3px solid #ff6666;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        #restart {
+            display: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            background: #ff6666;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        #restart:hover {
+            background: #ff3333;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress {
+            height: 100%;
+            background: #66ccff;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .star {
+            position: absolute;
+            font-size: 30px;
+            color: #ffcc00;
+            animation: starAnimation 1s ease-out forwards;
+        }
+        @keyframes starAnimation {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        .mascot {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 80px;
+            height: 80px;
+            background: url('https://via.placeholder.com/80?text=🐼') no-repeat center;
+            background-size: contain;
+        }
+        .message {
+            position: absolute;
+            top: 90px;
+            left: 10px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 16px;
+            color: #333;
+            display: none;
+        }
+        @media (max-width: 600px) {
+            .pinyin, .box, .character {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+                margin: 5px;
+            }
+            #restart {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+            .mascot {
+                width: 60px;
+                height: 60px;
+            }
+            .message {
+                font-size: 14px;
+                top: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="mascot"></div>
+        <div class="message" id="mascotMessage"></div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+        <div class="row" id="pinyinRow"></div>
+        <div class="row" id="boxRow"></div>
+        <div class="row" id="characterRow"></div>
+        <button id="restart">重新开始</button>
+    </div>
+
+    <script>
+        const pronunciationMap = {
+            "一": "yī", "二": "èr", "三": "sān", "四": "sì", "五": "wǔ",
+            "六": "liù", "七": "qī", "八": "bā", "九": "jiǔ", "十": "shí",
+            "两": "liǎng", "只": "zhī", "头": "tóu", "又": "yòu", "了": "le",
+            "不": "bù", "大": "dà", "小": "xiǎo", "上": "shàng", "下": "xià",
+            "多": "duō", "少": "shǎo", "白": "bái", "天": "tiān", "云": "yún",
+            "山": "shān", "月": "yuè", "亮": "liàng", "星": "xīng", "马": "mǎ",
+            "牛": "niú", "羊": "yáng", "兔": "tù", "虫": "chóng", "鸟": "niǎo",
+            "花": "huā", "草": "cǎo", "树": "shù", "看": "kàn", "走": "zǒu",
+            "笑": "xiào", "来": "lái", "飞": "fēi", "爱": "ài", "是": "shì",
+            "跑": "pǎo", "跳": "tiào", "高": "gāo", "太": "tài", "阳": "yáng",
+            "地": "dì", "吃": "chī", "兴": "xìng", "快": "kuài", "好": "hǎo",
+            "的": "de", "爸": "bà", "妈": "mā", "我": "wǒ", "人": "rén",
+            "儿": "ér", "子": "zǐ", "口": "kǒu", "几": "jǐ", "个": "gè",
+            "中": "zhōng", "牙": "yá", "门": "mén", "手": "shǒu", "心": "xīn",
+            "什": "shén", "么": "me", "开": "kāi", "可": "kě", "回": "huí",
+            "出": "chū", "去": "qù", "里": "lǐ", "床": "chuáng", "车": "chē",
+            "家": "jiā", "爷": "yé", "奶": "nǎi", "你": "nǐ", "水": "shuǐ",
+            "饭": "fàn", "有": "yǒu", "找": "zhǎo", "坐": "zuò", "听": "tīng",
+            "玩": "wán", "哭": "kū", "起": "qǐ", "喝": "hē", "到": "dào",
+            "河": "hé", "海": "hǎi", "风": "fēng", "雨": "yǔ", "雪": "xuě",
+            "春": "chūn", "夏": "xià", "秋": "qiū", "冬": "dōng", "鱼": "yú",
+            "狼": "láng", "猫": "māo", "狗": "gǒu", "蝶": "dié", "蜂": "fēng",
+            "谢": "xiè", "睡": "shuì", "红": "hóng", "蓝": "lán", "绿": "lǜ",
+            "美": "měi", "丽": "lì", "木": "mù", "王": "wáng", "日": "rì",
+            "百": "bǎi", "公": "gōng", "主": "zhǔ", "生": "shēng", "长": "zhǎng",
+            "见": "jiàn", "女": "nǚ", "在": "zài", "早": "zǎo", "叶": "yè",
+            "森": "sēn", "林": "lín", "书": "shū", "习": "xí", "对": "duì",
+            "没": "méi", "老": "lǎo", "师": "shī", "他": "tā", "们": "men",
+            "前": "qián", "后": "hòu", "哥": "gē", "姐": "jiě", "弟": "dì",
+            "妹": "mèi", "国": "guó", "衣": "yī", "服": "fú", "幼": "yòu",
+            "园": "yuán", "校": "xiào", "爬": "pá", "藏": "cáng", "说": "shuō",
+            "觉": "jué", "打": "dǎ", "写": "xiě", "做": "zuò", "穿": "chuān",
+            "要": "yào", "想": "xiǎng", "黄": "huáng", "黑": "hēi", "很": "hěn",
+            "再": "zài", "把": "bǎ", "和": "hé", "啊": "ā", "吧": "ba",
+            "吗": "mā", "得": "de", "着": "zhe", "千": "qiān", "万": "wàn",
+            "画": "huà", "学": "xué", "乐": "lè", "土": "tǔ", "火": "huǒ",
+            "光": "guāng", "力": "lì", "气": "qì", "午": "wǔ", "发": "fā",
+            "电": "diàn", "宝": "bǎo", "贝": "bèi", "自": "zì", "己": "jǐ",
+            "身": "shēn", "今": "jīn", "年": "nián", "岁": "suì", "米": "mǐ",
+            "面": "miàn", "包": "bāo", "瓜": "guā", "果": "guǒ", "点": "diǎn",
+            "字": "zì", "话": "huà", "机": "jī", "船": "chuán", "菜": "cài",
+            "孩": "hái", "为": "wèi", "比": "bǐ", "会": "huì", "站": "zhàn",
+            "行": "xíng", "叫": "jiào", "过": "guò", "关": "guān", "喜": "xǐ",
+            "欢": "huān", "怕": "pà", "给": "gěi", "跟": "gēn", "进": "jìn",
+            "干": "gàn", "坏": "huài", "青": "qīng", "明": "míng", "晚": "wǎn",
+            "真": "zhēn", "饱": "bǎo", "错": "cuò", "东": "dōng", "西": "xī",
+            "外": "wài", "每": "měi", "这": "zhè", "她": "tā", "也": "yě",
+            "还": "hái", "以": "yǐ", "呢": "ne", "工": "gōng", "方": "fāng",
+            "本": "běn", "文": "wén", "石": "shí", "金": "jīn", "朋": "péng",
+            "友": "yǒu", "叔": "shū", "娃": "wá", "婆": "pó", "医": "yī",
+            "耳": "ěr", "眼": "yǎn", "晴": "qíng", "蛙": "wā", "鸡": "jī",
+            "鸭": "yā", "苹": "píng", "桃": "táo", "球": "qiú", "笔": "bǐ",
+            "灯": "dēng", "语": "yǔ", "课": "kè", "歌": "gē", "声": "shēng",
+            "音": "yīn", "边": "biān", "时": "shí", "体": "tǐ", "样": "yàng",
+            "分": "fēn", "问": "wèn", "变": "biàn", "成": "chéng", "用": "yòng",
+            "加": "jiā", "买": "mǎi", "当": "dāng", "动": "dòng", "作": "zuò",
+            "住": "zhù", "放": "fàng", "读": "dú", "转": "zhuǎn", "唱": "chàng",
+            "停": "tíng", "游": "yóu", "数": "shǔ", "像": "xiàng", "反": "fǎn",
+            "正": "zhèng", "同": "tóng", "空": "kōng", "新": "xīn", "片": "piàn",
+            "半": "bàn", "朵": "duǒ", "条": "tiáo", "北": "běi", "南": "nán",
+            "那": "nà", "谁": "shéi", "才": "cái", "更": "gèng", "都": "dōu",
+            "从": "cóng", "向": "xiàng", "就": "jiù"
+        };
+
+        let weights = JSON.parse(localStorage.getItem('weights')) || {};
+        Object.keys(pronunciationMap).forEach(char => {
+            if (!weights[char]) weights[char] = 1;
+        });
+
+        const pinyinRow = document.getElementById('pinyinRow');
+        const boxRow = document.getElementById('boxRow');
+        const characterRow = document.getElementById('characterRow');
+        const restartBtn = document.getElementById('restart');
+        const progressBar = document.getElementById('progress');
+        const mascotMessage = document.getElementById('mascotMessage');
+        let selectedPairs = [];
+
+        function initGame() {
+            pinyinRow.innerHTML = '';
+            boxRow.innerHTML = '';
+            characterRow.innerHTML = '';
+            restartBtn.style.display = 'none';
+            progressBar.style.width = '0%';
+            showMessage("开始匹配吧！");
+
+            selectedPairs = selectRandomPairs(5);
+            selectedPairs.forEach(pair => {
+                const pinyinDiv = document.createElement('div');
+                pinyinDiv.className = 'pinyin';
+                pinyinDiv.textContent = pair.pinyin;
+                pinyinRow.appendChild(pinyinDiv);
+
+                const boxDiv = document.createElement('div');
+                boxDiv.className = 'box';
+                boxDiv.dataset.pinyin = pair.pinyin;
+                boxDiv.addEventListener('dragover', dragOver);
+                boxDiv.addEventListener('drop', drop);
+                boxRow.appendChild(boxDiv);
+            });
+
+            const shuffledChars = shuffle(selectedPairs.map(pair => pair.char));
+            shuffledChars.forEach(char => {
+                const charDiv = document.createElement('div');
+                charDiv.className = 'character';
+                charDiv.textContent = char;
+                charDiv.draggable = true;
+                charDiv.addEventListener('dragstart', dragStart);
+                charDiv.addEventListener('click', () => speak(char));
+                characterRow.appendChild(charDiv);
+            });
+        }
+
+        function selectRandomPairs(num) {
+            const chars = Object.keys(pronunciationMap);
+            const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
+            const pairs = [];
+            while (pairs.length < num) {
+                const rand = Math.random() * totalWeight;
+                let sum = 0;
+                for (let char of chars) {
+                    sum += weights[char];
+                    if (sum >= rand && !pairs.some(p => p.char === char)) {
+                        pairs.push({ char, pinyin: pronunciationMap[char] });
+                        break;
+                    }
+                }
+            }
+            return pairs;
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function dragStart(e) {
+            e.dataTransfer.setData('text', e.target.textContent);
+        }
+
+        function dragOver(e) {
+            if (!e.target.classList.contains('filled')) {
+                e.preventDefault();
+            }
+        }
+
+        function drop(e) {
+            e.preventDefault();
+            const char = e.dataTransfer.getData('text');
+            const pinyin = e.target.dataset.pinyin;
+            if (pronunciationMap[char] === pinyin) {
+                e.target.textContent = char;
+                e.target.classList.add('filled');
+                weights[char] = Math.max(0.05, weights[char] * 0.8);
+                characterRow.removeChild([...characterRow.children].find(c => c.textContent === char));
+                addStar(e.target);
+                playSound('correct');
+                showMessage("太棒了！");
+                updateProgress();
+                checkGameComplete();
+            } else {
+                e.target.classList.add('error');
+                weights[char] = Math.min(0.9, weights[char] * 1.2);
+                playSound('error');
+                showMessage("再试一次吧！");
+                setTimeout(() => e.target.classList.remove('error'), 500);
+            }
+            localStorage.setItem('weights', JSON.stringify(weights));
+        }
+
+        function updateProgress() {
+            const filledCount = boxRow.querySelectorAll('.filled').length;
+            const total = selectedPairs.length;
+            progressBar.style.width = `${(filledCount / total) * 100}%`;
+        }
+
+        function addStar(target) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.textContent = '★';
+            star.style.left = `${target.offsetLeft + target.offsetWidth / 2 - 15}px`;
+            star.style.top = `${target.offsetTop - 30}px`;
+            document.querySelector('.container').appendChild(star);
+            setTimeout(() => star.remove(), 1000);
+        }
+
+        function playSound(type) {
+            const audio = new Audio();
+            audio.src = type === 'correct' 
+                ? 'https://www.soundjay.com/buttons/sounds/beep-01a.mp3' // Replace with a cheerful sound URL
+                : 'https://www.soundjay.com/buttons/sounds/beep-02.mp3'; // Replace with a gentle error sound URL
+            audio.play().catch(() => console.log('Audio play failed'));
+        }
+
+        function showMessage(text) {
+            mascotMessage.textContent = text;
+            mascotMessage.style.display = 'block';
+            setTimeout(() => mascotMessage.style.display = 'none', 2000);
+        }
+
+        function checkGameComplete() {
+            if (boxRow.querySelectorAll('.filled').length === selectedPairs.length) {
+                restartBtn.style.display = 'block';
+                showMessage("你真厉害！");
+            }
+        }
+
+        function speak(char) {
+            const utterance = new SpeechSynthesisUtterance(pronunciationMap[char]);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.8;
+            utterance.volume = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            const mandarinVoice = voices.find(voice => voice.lang === 'zh-CN' && voice.name.includes('Mandarin'));
+            if (mandarinVoice) {
+                utterance.voice = mandarinVoice;
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+
+        window.addEventListener('load', () => {
+            window.speechSynthesis.getVoices();
+            initGame();
+        });
+
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
+
+        restartBtn.addEventListener('click', initGame);
+    </script>
+</body>
+</html>
